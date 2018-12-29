@@ -1,6 +1,7 @@
 package kr.tjeit.startacitivityforresult;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -9,11 +10,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 public class MainActivity extends BaseActivity {
 
     final static int REQUEST_FOR_USER_NAME = 1000;
     final static int REQUEST_FOR_USER_BIRTHDAY = 1001;
     final static int REQUEST_FOR_PICTURE_GALLERY = 1002;
+    final static int REQUEST_FOR_PICTURE_CROP = 1003;
 
     private Button nameInputBtn;
     private android.widget.TextView birthDayTxt;
@@ -48,8 +52,19 @@ public class MainActivity extends BaseActivity {
                 nameTxt.setText(userName);
             }
             Toast.makeText(mContext, "사용자이름", Toast.LENGTH_SHORT).show();
-        } else if (requestCode == REQUEST_FOR_USER_BIRTHDAY)
+        } else if (requestCode == REQUEST_FOR_USER_BIRTHDAY){
             Toast.makeText(mContext, "생년월일", Toast.LENGTH_SHORT).show();
+        }
+        else if(requestCode == REQUEST_FOR_PICTURE_GALLERY){
+            if(resultCode==RESULT_OK){
+                Uri selectedImageUri = data.getData();
+//                String imagePath = selectedImageUri.getPath();
+
+                Glide.with(mContext).load(selectedImageUri).into(profileImg);
+
+//                cropImage(selectedImageUri);
+            }
+        }
     }
 
     @Override
@@ -94,6 +109,25 @@ public class MainActivity extends BaseActivity {
     public void setValues() {
 
     }
+
+    private void cropImage(Uri uri){
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra("crop",true);
+
+//        잘라낸 파일의 크기
+        intent.putExtra("outputX",320);
+        intent.putExtra("outputY",320);
+
+//        잘라내는 비율
+        intent.putExtra("aspectX",1);
+        intent.putExtra("aspectY",1);
+
+        intent.putExtra("return-data",true);
+
+        startActivityForResult(intent, REQUEST_FOR_PICTURE_CROP);
+    }
+
 
     @Override
     public void bindViews() {
