@@ -1,8 +1,10 @@
 package kr.tjeit.startacitivityforresult;
 
+import android.Manifest;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
@@ -11,6 +13,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
+
+import java.security.Permission;
+import java.util.List;
 
 public class MainActivity extends BaseActivity {
 
@@ -18,6 +25,7 @@ public class MainActivity extends BaseActivity {
     final static int REQUEST_FOR_USER_BIRTHDAY = 1001;
     final static int REQUEST_FOR_PICTURE_GALLERY = 1002;
     final static int REQUEST_FOR_PICTURE_CROP = 1003;
+    final static int REQUEST_FOR_PICTURE_CAMERA = 1004;
 
     private Button nameInputBtn;
     private android.widget.TextView birthDayTxt;
@@ -91,6 +99,24 @@ public class MainActivity extends BaseActivity {
         cameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                PermissionListener permissionListener = new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted() {
+//                        허가가 난 경우
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(intent, REQUEST_FOR_PICTURE_CAMERA);
+
+                    }
+
+                    @Override
+                    public void onPermissionDenied(List<String> deniedPermissions) {
+//                        허가가 안나면 권한이 필요하다는 토스트  출력
+                        Toast.makeText(mContext, "카메라 권한이 필요합니다", Toast.LENGTH_SHORT).show();
+                    }
+                };
+
+                TedPermission.with(mContext).setPermissions(Manifest.permission.CAMERA).setPermissionListener(permissionListener).check();
 
             }
         });
